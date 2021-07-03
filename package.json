@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "name": "ff-ranking-back",
+  "version": "1.0.0",
+  "main": "app.js",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "twitter": "^1.7.1",
+    "twitter-v2": "^1.1.0"
+  }
+}
