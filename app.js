@@ -11,12 +11,9 @@ app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-app.get('/', (req, res) => {
-  console.log('getだよ')
-  res.send('何もないページです')
-})
+app.options('/', cors())
 
-app.post('/twitter', async (req, res) => {
+app.post('/', async (req, res) => {
   const uid = req.body.user_id
   const secret = JSON.parse(
     fs.readFileSync('./assets/json/secret.json', 'utf-8')
@@ -26,6 +23,7 @@ app.post('/twitter', async (req, res) => {
   let response
   let extractionAll = []
   try {
+    let idErrorFlg = false
     //IDを取得
     const idContents = await client
       .get('friends/ids', {
@@ -33,8 +31,11 @@ app.post('/twitter', async (req, res) => {
         count: 300,
       })
       .catch((e) => {
-        console.log(`friends/ids${uid}のエラー`)
-        console.dir(e, { depth: null })
+        if (!idErrorFlg) {
+          console.log(`friends/ids${uid}のエラー`)
+          console.dir(e, { depth: null })
+          idErrorFlg = true
+        }
         throw new Error(e[0].message)
       })
 
@@ -44,16 +45,19 @@ app.post('/twitter', async (req, res) => {
     const _year = _date.getFullYear()
     let _month = _date.getMonth() + 1
     _month = _month < 10 ? '0' + _month : _month
-    const _day = _date.getDate()
+    let _day = _date.getDate()
+    _day = _day < 10 ? '0' + _day : _day
 
     const date = new Date(req.body.date)
     const year = date.getFullYear()
     let month = date.getMonth() + 1
     month = month < 10 ? '0' + month : month
-    const day = date.getDate()
+    let day = date.getDate()
+    day = day < 10 ? '0' + day : day
 
     const start = `${_year}-${_month}-${_day}T15:00:00Z`
     const end = `${year}-${month}-${day}T14:59:59Z`
+    let userErrorFlg = false
     await Promise.all(
       idContents.ids.map(async (id) => {
         const tweets = await clientV2
@@ -82,7 +86,11 @@ app.post('/twitter', async (req, res) => {
             'media.fields': ['type', 'url'],
           })
           .catch((e) => {
-            console.log(`users/${id}/tweetsのエラー`)
+            if (!userErrorFlg) {
+              console.log(`users/${id}/tweetsのエラー`)
+              console.dir(e, { depth: null })
+              userErrorFlg = true
+            }
             throw new Error(e)
           })
         //取得したツイートから必要なデータを抽出
@@ -103,8 +111,9 @@ app.post('/twitter', async (req, res) => {
     //並べ替えてレスポンスをセット
     concatExtractionAll.sort((a, b) => (a.score > b.score ? -1 : 1))
     response = concatExtractionAll
-    const response50 = response.slice(0, 50)
-    res.json(response50)
+    response = response.slice(0, 50)
+
+    res.json(response)
   } catch (e) {
     res.json({ error: e.message })
   }
