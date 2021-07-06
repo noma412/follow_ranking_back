@@ -1,20 +1,14 @@
-import express from 'express'
-import cors from 'cors'
-import bodyParser from 'body-parser'
 import Twitter from 'twitter'
 import TwitterV2 from 'twitter-v2'
 import fs from 'fs'
 import { process } from './function/tweets.js'
 
-const app = express()
-app.use(cors())
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-
-app.options('/', cors())
-
-app.post('/', async (req, res) => {
-  const uid = req.body.user_id
+exports.handler = async (event) => {
+  if(event.requestContext.http.method === 'OPTIONS'){
+    return {statusCode: 200}
+  }
+  event.body = JSON.parse(event.body)
+  const uid = event.body.user_id
   const secret = JSON.parse(
     fs.readFileSync('./assets/json/secret.json', 'utf-8')
   )
@@ -40,7 +34,7 @@ app.post('/', async (req, res) => {
       })
 
     //取得したID(ユーザー)のツイートを取得
-    const _date = new Date(req.body.date)
+    const _date = new Date(event.body.date)
     _date.setDate(_date.getDate() - 1)
     const _year = _date.getFullYear()
     let _month = _date.getMonth() + 1
@@ -48,7 +42,7 @@ app.post('/', async (req, res) => {
     let _day = _date.getDate()
     _day = _day < 10 ? '0' + _day : _day
 
-    const date = new Date(req.body.date)
+    const date = new Date(event.body.date)
     const year = date.getFullYear()
     let month = date.getMonth() + 1
     month = month < 10 ? '0' + month : month
@@ -110,15 +104,11 @@ app.post('/', async (req, res) => {
 
     //並べ替えてレスポンスをセット
     concatExtractionAll.sort((a, b) => (a.score > b.score ? -1 : 1))
-    response = concatExtractionAll
-    response = response.slice(0, 50)
+    response = concatExtractionAll.slice(0, 50)
 
-    res.json(response)
+    return response
+
   } catch (e) {
-    res.json({ error: e.message })
+    return { error: e.message }
   }
-})
-
-const server = app.listen(1000, () => {
-  console.log('サーバー起動')
-})
+}
