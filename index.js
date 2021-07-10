@@ -4,8 +4,8 @@ import fs from 'fs'
 import { process } from './function/tweets.js'
 
 exports.handler = async (event) => {
-  if(event.requestContext.http.method === 'OPTIONS'){
-    return {statusCode: 200}
+  if (event.requestContext.http.method === 'OPTIONS') {
+    return { statusCode: 200 }
   }
   event.body = JSON.parse(event.body)
   const uid = event.body.user_id
@@ -22,7 +22,7 @@ exports.handler = async (event) => {
     const idContents = await client
       .get('friends/ids', {
         user_id: uid,
-        count: 300,
+        count: 750,
       })
       .catch((e) => {
         if (!idErrorFlg) {
@@ -107,7 +107,6 @@ exports.handler = async (event) => {
     response = concatExtractionAll.slice(0, 50)
 
     return response
-
   } catch (e) {
     return { error: e.message }
   }
