@@ -59,7 +59,7 @@ export const process = (tweets) => {
     //like
     const favorite_count = data.public_metrics.like_count
     //retweet
-    const retweet_count = data.public_metrics.quote_count
+    const retweet_count = data.public_metrics.retweet_count
     //url
     const url = `https://twitter.com/${screen_name}/status/${data.id}`
 
