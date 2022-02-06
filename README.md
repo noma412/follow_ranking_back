@@ -18,3 +18,6 @@
 **● 使用 API**
 
 - Twitter API
+
+**● ウェブサイト**
+- https://noma412.github.io/follow_ranking_front/
