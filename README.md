@@ -21,3 +21,4 @@
 
 **● ウェブサイト**
 - https://noma412.github.io/follow_ranking_front/
+→ 現在、Twitter APIが制限されている影響でアクセスできません。
